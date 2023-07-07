@@ -32,6 +32,9 @@ export const BookCheckoutPage = () => {
     const [isCheckedOut, setIsCheckedOut] = useState(false);
     const [isLoadingBookCheckedOut, setIsLoadingBookCheckedOut] = useState(true);
 
+    // Payment
+    const [displayError, setDisplayError] = useState(false);
+
     const bookId = (window.location.pathname).split('/')[2];
 
     useEffect(() => {
@@ -97,15 +100,15 @@ export const BookCheckoutPage = () => {
             }
 
             if (loadedReviews) {
-                const round = (Math.round((weightedStarReviews / loadedReviews.length) * 2 ) / 2).toFixed(1);
+                const round = (Math.round((weightedStarReviews / loadedReviews.length) * 2) / 2).toFixed(1);
                 setTotalStars(Number(round));
             }
 
             setReviews(loadedReviews);
             setIsLoadingReview(false);
         };
-        
-        fetchBookReviews().catch((error: any) =>{
+
+        fetchBookReviews().catch((error: any) => {
             setIsLoadingReview(false);
             setHttpError(error.message);
         });
@@ -158,7 +161,7 @@ export const BookCheckoutPage = () => {
             }
             setIsLoadingCurrentLoansCount(false);
         };
-        fetchUserCurrentLoansCount().catch((error: any) =>{
+        fetchUserCurrentLoansCount().catch((error: any) => {
             setIsLoadingCurrentLoansCount(false);
             setHttpError(error.message);
         });
@@ -184,7 +187,7 @@ export const BookCheckoutPage = () => {
             }
             setIsLoadingBookCheckedOut(false);
         };
-        fetchUserCheckedOutBook().catch((error: any) =>{
+        fetchUserCheckedOutBook().catch((error: any) => {
             setIsLoadingBookCheckedOut(false);
             setHttpError(error.message);
         });
@@ -215,8 +218,10 @@ export const BookCheckoutPage = () => {
         };
         const checkoutResponse = await fetch(url, requestOptions);
         if (!checkoutResponse.ok) {
+            setDisplayError(true);
             throw new Error('Something went wrong!');
         }
+        setDisplayError(false);
         setIsCheckedOut(true);
     }
 
@@ -246,6 +251,10 @@ export const BookCheckoutPage = () => {
     return (
         <div>
             <div className='container d-none d-lg-block'>
+                {displayError && <div className='alert alert-danger mt-3' role='alert'>
+                    Please pay outstanding fees and/or return late book(s).
+                </div>
+                }
                 <div className='row mt-5'>
                     <div className='col-sm-2 col-md-2'>
                         {book?.img ?
@@ -265,12 +274,16 @@ export const BookCheckoutPage = () => {
                     </div>
                     <CheckoutAndReviewBox book={book} mobile={false} currentLoansCount={currentLoansCount}
                         isAuthenticated={authState?.isAuthenticated} isCheckedOut={isCheckedOut}
-                        checkoutBook={checkoutBook} isReviewLeft={isReviewLeft} submitReview={submitReview}/>
+                        checkoutBook={checkoutBook} isReviewLeft={isReviewLeft} submitReview={submitReview} />
                 </div>
                 <hr />
-                <LatestReviews reviews={reviews} bookId={book?.id} mobile={false}/>
+                <LatestReviews reviews={reviews} bookId={book?.id} mobile={false} />
             </div>
             <div className='container d-lg-none mt-5'>
+                {displayError && <div className='alert alert-danger mt-3' role='alert'>
+                    Please pay outstanding fees and/or return late book(s).
+                </div>
+                }
                 <div className='d-flex justify-content-center align-items-center'>
                     {book?.img ?
                         <img src={book?.img} width='226' height='349' alt='Book' />
@@ -287,11 +300,11 @@ export const BookCheckoutPage = () => {
                         <StarsReview rating={totalStars} size={32} />
                     </div>
                 </div>
-                <CheckoutAndReviewBox book={book} mobile={true} currentLoansCount={currentLoansCount} 
-                    isAuthenticated={authState?.isAuthenticated} isCheckedOut={isCheckedOut} 
-                    checkoutBook={checkoutBook} isReviewLeft={isReviewLeft} submitReview={submitReview}/>
+                <CheckoutAndReviewBox book={book} mobile={true} currentLoansCount={currentLoansCount}
+                    isAuthenticated={authState?.isAuthenticated} isCheckedOut={isCheckedOut}
+                    checkoutBook={checkoutBook} isReviewLeft={isReviewLeft} submitReview={submitReview} />
                 <hr />
-                <LatestReviews reviews={reviews} bookId={book?.id} mobile={true}/>
+                <LatestReviews reviews={reviews} bookId={book?.id} mobile={true} />
             </div>
         </div>
     );
